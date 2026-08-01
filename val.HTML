@@ -694,22 +694,21 @@ handleFile(file);
                     a.href = url;
                     a.download = outputName;
                     document.body.appendChild(a);
-                    if (isiOS && navigator.share) {
 
-    const out = new File(
-        [blob],
-        outputName,
-        { type: "video/mp4" }
-    );
-
-    navigator.share({
-        files: [out]
+if (isiOS && navigator.canShare) {
+    const out = new File([blob], outputName, {
+        type: "video/mp4"
     });
 
+    try {
+        await navigator.share({
+            files: [out]
+        });
+    } catch (e) {
+        a.click();
+    }
 } else {
-
     a.click();
-
 }
                     
                     // Cleanup
