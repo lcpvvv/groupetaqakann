@@ -694,24 +694,20 @@ handleFile(file);
                     a.href = url;
                     a.download = outputName;
                     document.body.appendChild(a);
+const url = URL.createObjectURL(blob);
 
-if (isiOS && navigator.share) {
-
-    const out = new File(
-        [blob],
-        outputName,
-        { type: "video/mp4" }
-    );
-
-    navigator.share({
-        files: [out]
-    });
-
+if (isiOS) {
+    window.open(url, "_blank");
 } else {
-
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = outputName;
+    document.body.appendChild(a);
     a.click();
-
+    a.remove();
 }
+
+setTimeout(() => URL.revokeObjectURL(url), 60000);
                     
                     // Cleanup
                     setTimeout(() => {
