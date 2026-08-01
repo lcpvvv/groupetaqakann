@@ -353,8 +353,24 @@
     type="file"
     id="fileInput"
     accept="video/*">
-        
-        <div class="stats-frame">
+
+<div id="downloadContainer" style="display:none;margin:20px 0;text-align:center;">
+    <a id="downloadBtn"
+       href="#"
+       download
+       style="
+           display:inline-block;
+           padding:12px 22px;
+           background:#28a745;
+           color:#fff;
+           border-radius:8px;
+           text-decoration:none;
+           font-weight:bold;">
+        📥 Click to Download
+    </a>
+</div>
+
+<div class="stats-frame">
             <div class="stats-title">إحصائيات</div>
             <div class="stats-label" id="statsLabel">
                 الفيديوهات المعالجة: 0<br>
@@ -686,7 +702,15 @@ handleFile(file);
                     }
                     
                     const blob = new Blob([clonedBuffer], { type: 'video/mp4' });
-                    const url = URL.createObjectURL(blob);
+                   const url = URL.createObjectURL(blob);
+
+const downloadBtn = document.getElementById("downloadBtn");
+const downloadContainer = document.getElementById("downloadContainer");
+
+downloadBtn.href = url;
+downloadBtn.download = outputName;
+
+downloadContainer.style.display = "block";
 
                     if (isiOS) {
                         const link=document.createElement('a');
