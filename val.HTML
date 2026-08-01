@@ -709,32 +709,31 @@ try{
 
 
     await ffmpeg.exec([
-        "-i",
-        inputName,
+    "-fflags",
+    "+genpts",
 
-        "-c:v",
-        "libx264",
+    "-itsscale",
+    "2",
 
-        "-preset",
-        "medium",
+    "-i",
+    "input.mp4",
 
-        "-crf",
-        "18",
+    "-map",
+    "0",
 
-        "-pix_fmt",
-        "yuv420p",
+    "-c",
+    "copy",
 
-        "-r",
-        "60",
+    "-copyts",
 
-        "-movflags",
-        "+faststart",
+    "-video_track_timescale",
+    "90000",
 
-        "-c:a",
-        "aac",
+    "-avoid_negative_ts",
+    "make_zero",
 
-        outputName
-    ]);
+    "output.mp4"
+]);
 
 
     const data =
