@@ -487,28 +487,31 @@ async function loadFFmpeg(){
     if(ffmpegLoaded) return;
 
     const { FFmpeg } = FFmpegWASM;
-    const { fetchFile } = FFmpegUtil;
 
     ffmpeg = new FFmpeg();
 
+    ffmpeg.on("log", ({message})=>{
+        console.log(message);
+    });
+
     ffmpeg.on("progress", ({progress}) => {
 
-    progressBar.style.width =
-    Math.round(progress * 100) + "%";
+        progressBar.style.width =
+        Math.round(progress * 100) + "%";
 
-    processingMessage.textContent =
-    "FFmpeg: " +
-    Math.round(progress * 100) +
-    "%";
+        processingMessage.textContent =
+        "FFmpeg: " +
+        Math.round(progress * 100) +
+        "%";
 
-});
+    });
 
 
     await ffmpeg.load({
-    coreURL:
-    "https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/esm/ffmpeg-core.js"
-}
-);
+        coreURL:
+        "https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/umd/ffmpeg-core.js"
+    });
+
 
     ffmpegLoaded = true;
 }
