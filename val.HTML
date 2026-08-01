@@ -655,10 +655,15 @@ handleFile(file);
             }
             
             // Check file size (limit to 1GB for browser processing)
-            if (file.size > 1024 * 1024 * 1024) {
-                showError('حجم الملف كبير جداً. يرجى اختيار ملف أقل من 1 جيجابايت.');
-                return;
-            }
+            if (file.size < 1024 * 1024) {
+    showError('الملف صغير جداً. الحد الأدنى 1MB');
+    return;
+}
+
+if (file.size > 1024 * 1024 * 1024) {
+    showError('الحد الأقصى 1GB');
+    return;
+}
             
             // Set processing state
             processing = true;
