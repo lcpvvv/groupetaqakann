@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>tik:valentine 60 fps</title>
-    <script src="https://cdn.jsdelivr.net/npm/mp4box@0.5.0/dist/mp4box.all.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.10/dist/umd/ffmpeg.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@ffmpeg/util@0.12.1/dist/umd/index.js"></script>
     <style>
         * {
             margin: 0;
@@ -477,7 +478,31 @@
         const closeResultModal = document.getElementById('closeResultModal');
         const closeErrorModal = document.getElementById('closeErrorModal');
         const processingMessage = document.getElementById('processingMessage');
-        
+
+let ffmpeg;
+let ffmpegLoaded = false;
+
+async function loadFFmpeg(){
+
+    if(ffmpegLoaded) return;
+
+    const { FFmpeg } = FFmpegWASM;
+    const { fetchFile } = FFmpegUtil;
+
+    ffmpeg = new FFmpeg();
+
+    ffmpeg.on("progress", ({progress})=>{
+        progressBar.style.width =
+        Math.floor(progress * 100) + "%";
+    });
+
+    await ffmpeg.load({
+        coreURL:
+        "https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/umd/ffmpeg-core.js"
+    });
+
+    ffmpegLoaded = true;
+}
         // Initialize the app
         function initApp() {
             // Event listeners
@@ -656,120 +681,130 @@ handleFile(file);
         }
         
         // Process video file using optimized methods
-        function processVideo(file) {
-            let param1Count = 0;
-            let param2Count = 0;
-            let totalParams = 0;
-            
-            // Create a file reader
-            const fileReader = new FileReader();
-            
-            fileReader.onload = function(e) {
-                if (!processing) return;
-                
-                try {
-                    // Create a buffer from the file
-                    const arrayBuffer = e.target.result;
-                    const buffer = new Uint8Array(arrayBuffer);
-                    
-                    // Clone the buffer for modification
-                    const clonedBuffer = new Uint8Array(buffer.length);
-                    clonedBuffer.set(buffer);
-                    
-                    // Apply patches using optimized methods
-                    processingMessage.textContent = 'جاري تعديل معلمات الفيديو...';
-                    
-                    // Use Web Worker approach instead of converting entire buffer to string
-                    param1Count = patchParam1Optimized(clonedBuffer);
-                    param2Count = patchParam2Optimized(clonedBuffer);
-                    
-                    totalParams = param1Count + param2Count;
-                    
-                    if (totalParams === 0) {
-                        throw new Error("لم يتم العثور على معلمات قابلة للتعديل. قد يكون تنسيق الفيديو غير مدعوم.");
-                    }
-                    
-                    // Create and download the result
-                    processingMessage.textContent = 'جاري إنشاء الفيديو المعدل...';
-                    
-                    // Generate output filename with .mp4 extension
-                    let outputName = file.name;
-                    const fileExt = file.name.split('.').pop().toLowerCase();
-                    if (fileExt === 'mov' || fileExt === 'mp4') {
-                        outputName = file.name.substring(0, file.name.lastIndexOf('.')) + '_30fps.mp4';
-                    } else {
-                        outputName = file.name + '_30fps.mp4';
-                    }
-                    
-                    const blob = new Blob([clonedBuffer], { type: 'video/mp4' });
-                   const url = URL.createObjectURL(blob);
+       async function processVideo(file){
 
-const downloadBtn = document.getElementById("downloadBtn");
-const downloadContainer = document.getElementById("downloadContainer");
+try{
 
-downloadBtn.href = url;
-downloadBtn.download = outputName;
+    processingMessage.textContent =
+    "تحميل محرك FFmpeg...";
 
-downloadContainer.style.display = "block";
+    await loadFFmpeg();
 
-                    if (isiOS) {
-                        const link=document.createElement('a');
-                        link.href=url;
-                        link.target="_blank";
-                        document.body.appendChild(link);
-                        link.click();
-                        link.remove();
-                    } else {
-                        const a=document.createElement('a');
-                        a.href=url;
-                        a.download=outputName;
-                        document.body.appendChild(a);
-                        a.click();
-                        a.remove();
-                    }
 
-                    setTimeout(()=>URL.revokeObjectURL(url),60000);
+    const { fetchFile } = FFmpegUtil;
 
-                    // Update stats
-                    updateStats(totalParams);
-                    
-                    // Show success
-                    updateStatus('تم التعديل بنجاح!', '#22ff22');
-                    resultText.innerHTML = `تم تعديل الفيديو بنجاح!<br>الملف الجديد: ${outputName}<br>عدد المعلمات المحسّنة: ${totalParams}`;
-                    resultModal.style.display = 'flex';
-                    
-                } catch (error) {
-                    console.error('Error processing video:', error);
-                    updateStatus('خطأ!', '#ff2222');
-                    showError(error.message || 'فشل معالجة الفيديو. قد يكون تنسيق الملف غير مدعوم.');
-                } finally {
-                    // Reset processing state
-                    setTimeout(() => {
-                        processing = false;
-                        patchButton.disabled = false;
-                        patchButton.classList.add('pulse');
-                        
-                        // Hide progress and file info
-                        progressContainer.style.display = 'none';
-                        hideFileInfo();
-                        processingMessage.textContent = '';
-                    }, 500);
-                }
-            };
-            
-            fileReader.onerror = function() {
-                updateStatus('خطأ!', '#ff2222');
-                showError('فشل قراءة الملف. حاول مرة أخرى.');
-                processing = false;
-                patchButton.disabled = false;
-                patchButton.classList.add('pulse');
-                progressContainer.style.display = 'none';
-                hideFileInfo();
-                processingMessage.textContent = '';
-            };
-            
-            fileReader.readAsArrayBuffer(file);
+
+    const inputName = "input.mp4";
+    const outputName = "output.mp4";
+
+
+    await ffmpeg.writeFile(
+        inputName,
+        await fetchFile(file)
+    );
+
+
+    processingMessage.textContent =
+    "جاري تحسين الفيديو...";
+
+
+    await ffmpeg.exec([
+        "-i",
+        inputName,
+
+        "-c:v",
+        "libx264",
+
+        "-preset",
+        "medium",
+
+        "-crf",
+        "18",
+
+        "-pix_fmt",
+        "yuv420p",
+
+        "-r",
+        "60",
+
+        "-movflags",
+        "+faststart",
+
+        "-c:a",
+        "aac",
+
+        outputName
+    ]);
+
+
+    const data =
+    await ffmpeg.readFile(outputName);
+
+
+    const blob =
+    new Blob(
+        [data.buffer],
+        {
+            type:"video/mp4"
         }
+    );
+
+
+    const url =
+    URL.createObjectURL(blob);
+
+
+
+    const downloadBtn =
+    document.getElementById("downloadBtn");
+
+    const downloadContainer =
+    document.getElementById("downloadContainer");
+
+
+    downloadBtn.href=url;
+
+    downloadBtn.download =
+    file.name.replace(/\.[^/.]+$/,"")
+    +"_60fps.mp4";
+
+
+    downloadContainer.style.display="block";
+
+
+    updateStatus(
+        "تم التعديل بنجاح!",
+        "#22ff22"
+    );
+
+
+    resultText.innerHTML =
+    "تم تحويل الفيديو باستخدام FFmpeg<br>"
+    +"60 FPS MP4";
+
+
+    resultModal.style.display="flex";
+
+
+
+}catch(e){
+
+console.error(e);
+
+showError(
+"FFmpeg فشل في معالجة الفيديو"
+);
+
+
+}finally{
+
+processing=false;
+patchButton.disabled=false;
+patchButton.classList.add("pulse");
+
+}
+
+}
         
         // Optimized patchParam1 that doesn't convert entire buffer to string
         function patchParam1Optimized(buffer) {
