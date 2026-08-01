@@ -350,11 +350,10 @@
         
         <div class="processing-message" id="processingMessage"></div>
         
-        <input
+   <input
     type="file"
     id="fileInput"
-    accept="video/*,.mov,.mp4"
-    multiple="false">
+    accept="video/mp4,video/quicktime,video/*">
         
         <div class="stats-frame">
             <div class="stats-title">إحصائيات</div>
@@ -474,15 +473,10 @@ fileInput.setAttribute("capture","false");
             });
             
            patchButton.addEventListener("click", () => {
+    if (processing) return;
 
-           if (processing) return;
-
-         fileInput.value = "";
-
-    setTimeout(() => {
-        fileInput.click();
-    }, 50);
-
+    fileInput.value = "";
+    fileInput.click();
 });
             
             fileInput.addEventListener('change', handleFileSelect);
