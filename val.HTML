@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>tik:valentine 60 fps</title>
@@ -688,33 +687,25 @@ handleFile(file);
                     
                     const blob = new Blob([clonedBuffer], { type: 'video/mp4' });
                     const url = URL.createObjectURL(blob);
-                    
-                    // Create download link
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = outputName;
-                    document.body.appendChild(a);
-const url = URL.createObjectURL(blob);
 
-if (isiOS) {
-    window.open(url, "_blank");
-} else {
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = outputName;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-}
+                    if (isiOS) {
+                        const link=document.createElement('a');
+                        link.href=url;
+                        link.target="_blank";
+                        document.body.appendChild(link);
+                        link.click();
+                        link.remove();
+                    } else {
+                        const a=document.createElement('a');
+                        a.href=url;
+                        a.download=outputName;
+                        document.body.appendChild(a);
+                        a.click();
+                        a.remove();
+                    }
 
-setTimeout(() => URL.revokeObjectURL(url), 60000);
-                    
-                    // Cleanup
-                    setTimeout(() => {
-                        document.body.removeChild(a);
-                        URL.revokeObjectURL(url);
-                    }, 100);
-                    
+                    setTimeout(()=>URL.revokeObjectURL(url),60000);
+
                     // Update stats
                     updateStats(totalParams);
                     
