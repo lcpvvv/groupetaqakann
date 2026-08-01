@@ -1,0 +1,976 @@
+<!fhd html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>tik:valentine 60 fps</title>
+    <script src="https://cdn.jsdelivr.net/npm/mp4box@0.5.0/dist/mp4box.all.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #6A0DAD;
+            color: #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            width: 400px;
+            background-color: #6A0DAD;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
+        }
+        
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .help-btn {
+            width: 25px;
+            height: 25px;
+            background-color: #5A0CA8;
+            border: none;
+            border-radius: 50%;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.3s;
+        }
+        
+        .help-btn:hover {
+            background-color: #3a3a3a;
+        }
+        
+        .version {
+            color: #666666;
+            font-size: 12px;
+        }
+        
+        .title {
+            font-size: 24px;
+            font-weight: bold;
+            margin: 10px 0 5px;
+            text-align: center;
+        }
+        
+        .subtitle {
+            color: #00a8ff;
+            font-size: 14px;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 30px;
+            cursor: pointer;
+        }
+        
+        .status-frame {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: #22ff22;
+            margin-right: 5px;
+        }
+        
+        .status-label {
+            color: #aaaaaa;
+            font-size: 14px;
+        }
+        
+        .progress-container {
+            width: 100%;
+            height: 8px;
+            background-color: #3a3a3a;
+            border-radius: 4px;
+            margin: 15px 0;
+            overflow: hidden;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background-color: #00a8ff;
+            border-radius: 4px;
+            transition: width 0.3s;
+        }
+        
+        .file-info-frame {
+            background-color: #5A0CA8;
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .file-info-label {
+            color: #aaaaaa;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        
+        .patch-button {
+            background-color: #5A0CA8;
+            color: white;
+            border: none;
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin: 20px 0;
+            height: 50px;
+        }
+        
+        .patch-button:hover {
+            background-color: #3a3a3a;
+        }
+        
+        .patch-button:disabled {
+            background-color: #444;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+        
+        .stats-frame {
+            margin-bottom: 30px;
+        }
+        
+        .stats-title {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        
+        .stats-label {
+            color: #aaaaaa;
+            font-size: 14px;
+            line-height: 1.6;
+            text-align: center;
+        }
+        
+        .tip-frame {
+            background-color: #5A0CA8;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        .tip-text {
+            color: #666666;
+            font-size: 14px;
+            font-weight: bold;
+            line-height: 1.4;
+        }
+        
+        #fileInput {
+            display: none;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background-color: #6A0DAD;
+            padding: 25px;
+            border-radius: 12px;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.5);
+            text-align: center;
+        }
+        
+        .modal-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #ffffff;
+        }
+        
+        .modal-text {
+            color: #aaaaaa;
+            margin-bottom: 20px;
+            line-height: 1.6;
+            text-align: right;
+        }
+        
+        .modal-close {
+            background-color: #5A0CA8;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .modal-close:hover {
+            background-color: #3a3a3a;
+        }
+        
+        .drag-area {
+            border: 2px dashed #444;
+            border-radius: 8px;
+            padding: 30px;
+            text-align: center;
+            margin: 15px 0;
+            background-color: #5A0CA8;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .drag-area:hover, .drag-area.drag-over {
+            border-color: #00a8ff;
+            background-color: #1a1a1a;
+        }
+        
+        .drag-text {
+            color: #aaaaaa;
+            margin-bottom: 10px;
+        }
+        
+        .drag-icon {
+            font-size: 24px;
+            color: #00a8ff;
+            margin-bottom: 8px;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .pulse {
+            animation: pulse 1.5s infinite;
+        }
+        
+        .processing-message {
+            text-align: center;
+            margin: 10px 0;
+            color: #aaaaaa;
+            font-size: 14px;
+        }
+        
+        .note {
+            color: #ffcc00;
+            font-size: 12px;
+            text-align: center;
+            margin-top: 5px;
+        }
+        
+        .warning {
+            color: #ff6666;
+            font-size: 12px;
+            text-align: center;
+            margin-top: 5px;
+        }
+        
+        .supported-formats {
+            color: #66ccff;
+            font-size: 12px;
+            text-align: center;
+            margin-top: 5px;
+        }
+        
+        .error-fix {
+            background-color: #ff3333;
+            color: white;
+            padding: 8px;
+            border-radius: 4px;
+            margin-top: 10px;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="top-bar">
+            <button class="help-btn" id="helpBtn">?</button>
+            <div class="version">FHD UP</div>
+        </div>
+        
+        <h1 class="title">LCpVALENTiNE</h1>
+        <div class="subtitle" id="FHDLink">tiktok : lcpvalentine </div>
+        
+        <div class="status-frame">
+            <div class="status-dot" id="statusDot"></div>
+            <div class="status-label" id="statusLabel">جاهز</div>
+        </div>
+        
+        <div class="file-info-frame" id="fileInfoFrame">
+            <div class="file-info-label" id="fileInfoLabel"></div>
+        </div>
+        
+        <div class="progress-container" id="progressContainer">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+        
+        <div class="drag-area" id="dragArea">
+            <div class="drag-icon">📁</div>
+            <div class="drag-text">اسحب وأفلت ملف الفيديو هنا</div>
+            <div class="drag-text">(MP4 أو MOV)</div>
+        </div>
+        
+        <button class="patch-button pulse" id="patchButton">اختر فيديو للتعديل</button>
+        
+        <div class="processing-message" id="processingMessage"></div>
+        
+        <input
+    type="file"
+    id="fileInput"
+    accept="video/*,.mov,.mp4"
+    multiple="false">
+        
+        <div class="stats-frame">
+            <div class="stats-title">إحصائيات</div>
+            <div class="stats-label" id="statsLabel">
+                الفيديوهات المعالجة: 0<br>
+                إجمالي المعلمات: 0
+            </div>
+        </div>
+        
+        <div class="tip-frame">
+            <div class="tip-text" id="tipText">هذي الأداة امانة، لا تشاركها مع اي احد</div>
+        </div>
+        
+        <div class="note">ملاحظة: جميع عمليات المعالجة تتم محلياً على جهازك</div>
+        <div class="warning">تحذير: الملفات الكبيرة قد تستغرق وقتاً أطول للمعالجة</div>
+        <div class="supported-formats">الصيغ المدعومة: MP4, MOV → MP4</div>
+    </div>
+    
+    <div class="modal" id="helpModal">
+        <div class="modal-content">
+            <div class="modal-title">مساعدة في تجاوز ضغط تيك توك</div>
+            <div class="modal-text">
+                <p><strong>طريقة الاستخدام:</strong></p>
+                <p>1. اضغط على 'اختر فيديو للتعديل' أو اسحب الملف إلى المنطقة المخصصة</p>
+                <p>2. اختر ملف الفيديو (MP4 أو MOV)</p>
+                <p>3. انتظر حتى تكتمل المعالجة</p>
+                <p>4. ستنزل الناتج كملف MP4 معدل</p>
+                <br>
+                <p><strong>نصائح:</strong></p>
+                <p>• استخدم فيديو عالي الجودة للحصول على أفضل النتائج</p>
+                <p>• تأكد من أن الفيديو 60 فريم</p>
+                <p>• لا تشارك هذه الأداة مع أي شخص</p>
+                <br>
+                <p><strong>ملاحظة:</strong></p>
+                <p>• البرنامج يدعم ملفات حتى 1 جيجابايت</p>
+                <p>• الملفات الكبيرة قد تستغرق وقتاً أطول للمعالجة</p>
+                <p>• جميع الملفات الناتجة تكون بصيغة MP4</p>
+                <p>• إصدار محسن لمعالجة الملفات الكبيرة</p>
+            </div>
+            <button class="modal-close" id="closeHelpModal">إغلاق</button>
+        </div>
+    </div>
+    
+    <div class="modal" id="resultModal">
+        <div class="modal-content">
+            <div class="modal-title">تم التعديل بنجاح!</div>
+            <div class="modal-text" id="resultText"></div>
+            <button class="modal-close" id="closeResultModal">حسناً</button>
+        </div>
+    </div>
+    
+    <div class="modal" id="errorModal">
+        <div class="modal-content">
+            <div class="modal-title">خطأ</div>
+            <div class="modal-text" id="errorText">حدث خطأ أثناء معالجة الفيديو. تأكد من أن الملف صالح ويحتوي على تنسيق مدعوم.</div>
+            <div class="error-fix" id="errorFix">
+                نصائح لحل المشكلة:
+                • حاول استخدام ملف أصغر
+                • تأكد من أن الملف ليس تالفاً
+                • أعد تحميل الصفحة وحاول مرة أخرى
+                • استخدم تنسيق MP4 بدلاً من MOV
+            </div>
+            <button class="modal-close" id="closeErrorModal">حاول مجدداً</button>
+        </div>
+    </div>
+
+    <script>
+        const isiOS =
+    /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+        // Global variables
+        let videosProcessed = 0;
+        let totalParams = 0;
+        let currentTipIndex = 0;
+        const tips = [
+            "هذي الأداة امانة، لا تشاركها مع اي احد",
+            "المقطع لازم يكون 60 فريم",
+            "استخدم مقطع قوي وحماسي لافضل النتائج",
+            "ارفع الفيديو بوقت مناسب مع هاشتاقات مناسبة"
+        ];
+        
+        let processing = false;
+        
+        // DOM Elements
+        const helpBtn = document.getElementById('helpBtn');
+        const FHDLink = document.getElementById('FHDLink');
+        const statusDot = document.getElementById('statusDot');
+        const statusLabel = document.getElementById('statusLabel');
+        const progressContainer = document.getElementById('progressContainer');
+        const progressBar = document.getElementById('progressBar');
+        const patchButton = document.getElementById('patchButton');
+        const fileInput = document.getElementById('fileInput');
+        fileInput.setAttribute("accept","video/*");
+fileInput.setAttribute("capture","false");
+        const fileInfoFrame = document.getElementById('fileInfoFrame');
+        const fileInfoLabel = document.getElementById('fileInfoLabel');
+        const statsLabel = document.getElementById('statsLabel');
+        const tipText = document.getElementById('tipText');
+        const dragArea = document.getElementById('dragArea');
+        const helpModal = document.getElementById('helpModal');
+        const resultModal = document.getElementById('resultModal');
+        const errorModal = document.getElementById('errorModal');
+        const resultText = document.getElementById('resultText');
+        const errorText = document.getElementById('errorText');
+        const errorFix = document.getElementById('errorFix');
+        const closeHelpModal = document.getElementById('closeHelpModal');
+        const closeResultModal = document.getElementById('closeResultModal');
+        const closeErrorModal = document.getElementById('closeErrorModal');
+        const processingMessage = document.getElementById('processingMessage');
+        
+        // Initialize the app
+        function initApp() {
+            // Event listeners
+            helpBtn.addEventListener('click', showHelp);
+            FHDLink.addEventListener('click', () => {
+                window.open('https://www.tiktok.com/@lcpvalentine?is_from_webapp=1&sender_device=pc', '_blank');
+            });
+            
+           patchButton.addEventListener("click", () => {
+
+           if (processing) return;
+
+         fileInput.value = "";
+
+    setTimeout(() => {
+        fileInput.click();
+    }, 50);
+
+});
+            
+            fileInput.addEventListener('change', handleFileSelect);
+            
+            dragArea.addEventListener('click', () => {
+                if (!processing) {
+                    fileInput.click();
+                }
+            });
+            
+            // Drag and drop functionality
+            dragArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                dragArea.classList.add('drag-over');
+            });
+            
+            dragArea.addEventListener('dragleave', () => {
+                dragArea.classList.remove('drag-over');
+            });
+            
+            dragArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                dragArea.classList.remove('drag-over');
+                
+                if (e.dataTransfer.files.length && !processing) {
+                    handleFile(e.dataTransfer.files[0]);
+                }
+            });
+            
+            // Modal close buttons
+            closeHelpModal.addEventListener('click', () => closeModal(helpModal));
+            closeResultModal.addEventListener('click', () => closeModal(resultModal));
+            closeErrorModal.addEventListener('click', () => closeModal(errorModal));
+            
+            // Close modal when clicking outside
+            window.addEventListener('click', (e) => {
+                if (e.target === helpModal) closeModal(helpModal);
+                if (e.target === resultModal) closeModal(resultModal);
+                if (e.target === errorModal) closeModal(errorModal);
+            });
+            
+            // Keyboard shortcuts
+            document.addEventListener('keydown', (e) => {
+                if (e.ctrlKey && e.key === 'o' && !processing) {
+                    fileInput.click();
+                }
+                if (e.key === 'Escape') {
+                    closeModal(helpModal);
+                    closeModal(resultModal);
+                    closeModal(errorModal);
+                }
+            });
+            
+            // Start rotating tips
+            rotateTips();
+        }
+        
+        // Show help modal
+        function showHelp() {
+            helpModal.style.display = 'flex';
+        }
+        
+        // Close modal
+        function closeModal(modal) {
+            modal.style.display = 'none';
+        }
+        
+        // Rotate tips every 3 seconds
+        function rotateTips() {
+            tipText.textContent = tips[currentTipIndex];
+            currentTipIndex = (currentTipIndex + 1) % tips.length;
+            setTimeout(rotateTips, 3000);
+        }
+        
+        // Update status
+        function updateStatus(message, color) {
+            statusLabel.textContent = message;
+            statusDot.style.backgroundColor = color || '#22ff22';
+        }
+        
+        // Update stats
+        function updateStats(params) {
+            videosProcessed++;
+            totalParams += params;
+            statsLabel.innerHTML = `الفيديوهات المعالجة: ${videosProcessed}<br>إجمالي المعلمات: ${totalParams}`;
+        }
+        
+        // Show file info
+        function showFileInfo(file) {
+            const fileSize = (file.size / (1024 * 1024)).toFixed(1);
+            const fileExt = file.name.split('.').pop().toLowerCase();
+            const fileFormat = fileExt === 'mov' ? 'QuickTime MOV' : 
+                              fileExt === 'mp4' ? 'MP4' : fileExt.toUpperCase();
+            fileInfoLabel.innerHTML = `الملف: ${file.name}<br>الصيغة: ${fileFormat}<br>الحجم: ${fileSize} ميجابايت`;
+            fileInfoFrame.style.display = 'block';
+        }
+        
+        // Hide file info
+        function hideFileInfo() {
+            fileInfoFrame.style.display = 'none';
+        }
+        
+        // Handle file selection
+        function handleFileSelect(e) {
+            if (e.target.files.length && !processing) {
+                const file = e.target.files[0];
+
+if (!file) return;
+
+handleFile(file);
+            }
+        }
+        
+        // Handle file processing
+        function handleFile(file) {
+            if (!file) {
+                showError('لم يتم اختيار ملف.');
+                return;
+            }
+            
+            // Check file type
+            const fileExt = file.name.split('.').pop().toLowerCase();
+            const validExtensions = ['mp4', 'mov'];
+            
+            if (!validExtensions.includes(fileExt)) {
+                showError('الملف غير صالح. يرجى اختيار ملف MP4 أو MOV.');
+                return;
+            }
+            
+            // Check file size (limit to 1GB for browser processing)
+            if (file.size > 1024 * 1024 * 1024) {
+                showError('حجم الملف كبير جداً. يرجى اختيار ملف أقل من 1 جيجابايت.');
+                return;
+            }
+            
+            // Set processing state
+            processing = true;
+            patchButton.disabled = true;
+            patchButton.classList.remove('pulse');
+            
+            // Reset file input
+            fileInput.value = '';
+            
+            // Show file info
+            showFileInfo(file);
+            
+            // Update status
+            updateStatus('جاري المعالجة...', '#ffff22');
+            
+            // Show progress at 0%
+            progressContainer.style.display = 'block';
+            progressBar.style.width = '0%';
+            
+            // Show warning for large files
+            if (file.size > 200 * 1024 * 1024) { // More than 200MB
+                processingMessage.textContent = 'ملف كبير - قد يستغرق وقتاً أطول...';
+            } else {
+                processingMessage.textContent = 'جاري تحليل هيكل الفيديو...';
+            }
+            
+            // Start processing the video
+            processVideo(file);
+        }
+        
+        // Process video file using optimized methods
+        function processVideo(file) {
+            let param1Count = 0;
+            let param2Count = 0;
+            let totalParams = 0;
+            
+            // Create a file reader
+            const fileReader = new FileReader();
+            
+            fileReader.onload = function(e) {
+                if (!processing) return;
+                
+                try {
+                    // Create a buffer from the file
+                    const arrayBuffer = e.target.result;
+                    const buffer = new Uint8Array(arrayBuffer);
+                    
+                    // Clone the buffer for modification
+                    const clonedBuffer = new Uint8Array(buffer.length);
+                    clonedBuffer.set(buffer);
+                    
+                    // Apply patches using optimized methods
+                    processingMessage.textContent = 'جاري تعديل معلمات الفيديو...';
+                    
+                    // Use Web Worker approach instead of converting entire buffer to string
+                    param1Count = patchParam1Optimized(clonedBuffer);
+                    param2Count = patchParam2Optimized(clonedBuffer);
+                    
+                    totalParams = param1Count + param2Count;
+                    
+                    if (totalParams === 0) {
+                        throw new Error("لم يتم العثور على معلمات قابلة للتعديل. قد يكون تنسيق الفيديو غير مدعوم.");
+                    }
+                    
+                    // Create and download the result
+                    processingMessage.textContent = 'جاري إنشاء الفيديو المعدل...';
+                    
+                    // Generate output filename with .mp4 extension
+                    let outputName = file.name;
+                    const fileExt = file.name.split('.').pop().toLowerCase();
+                    if (fileExt === 'mov' || fileExt === 'mp4') {
+                        outputName = file.name.substring(0, file.name.lastIndexOf('.')) + '_30fps.mp4';
+                    } else {
+                        outputName = file.name + '_30fps.mp4';
+                    }
+                    
+                    const blob = new Blob([clonedBuffer], { type: 'video/mp4' });
+                    const url = URL.createObjectURL(blob);
+                    
+                    // Create download link
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = outputName;
+                    document.body.appendChild(a);
+                    if (isiOS && navigator.share) {
+
+    const out = new File(
+        [blob],
+        outputName,
+        { type: "video/mp4" }
+    );
+
+    navigator.share({
+        files: [out]
+    });
+
+} else {
+
+    a.click();
+
+}
+                    
+                    // Cleanup
+                    setTimeout(() => {
+                        document.body.removeChild(a);
+                        URL.revokeObjectURL(url);
+                    }, 100);
+                    
+                    // Update stats
+                    updateStats(totalParams);
+                    
+                    // Show success
+                    updateStatus('تم التعديل بنجاح!', '#22ff22');
+                    resultText.innerHTML = `تم تعديل الفيديو بنجاح!<br>الملف الجديد: ${outputName}<br>عدد المعلمات المحسّنة: ${totalParams}`;
+                    resultModal.style.display = 'flex';
+                    
+                } catch (error) {
+                    console.error('Error processing video:', error);
+                    updateStatus('خطأ!', '#ff2222');
+                    showError(error.message || 'فشل معالجة الفيديو. قد يكون تنسيق الملف غير مدعوم.');
+                } finally {
+                    // Reset processing state
+                    setTimeout(() => {
+                        processing = false;
+                        patchButton.disabled = false;
+                        patchButton.classList.add('pulse');
+                        
+                        // Hide progress and file info
+                        progressContainer.style.display = 'none';
+                        hideFileInfo();
+                        processingMessage.textContent = '';
+                    }, 500);
+                }
+            };
+            
+            fileReader.onerror = function() {
+                updateStatus('خطأ!', '#ff2222');
+                showError('فشل قراءة الملف. حاول مرة أخرى.');
+                processing = false;
+                patchButton.disabled = false;
+                patchButton.classList.add('pulse');
+                progressContainer.style.display = 'none';
+                hideFileInfo();
+                processingMessage.textContent = '';
+            };
+            
+            fileReader.readAsArrayBuffer(file);
+        }
+        
+        // Optimized patchParam1 that doesn't convert entire buffer to string
+        function patchParam1Optimized(buffer) {
+            let patched = 0;
+            let offset = 0;
+            const target = new Uint8Array([109, 118, 104, 100]); // 'mvhd' in bytes
+            
+            while (true) {
+                // Find 'mvhd' in buffer
+                let found = false;
+                for (let i = offset; i <= buffer.length - 4; i++) {
+                    if (buffer[i] === target[0] && 
+                        buffer[i+1] === target[1] && 
+                        buffer[i+2] === target[2] && 
+                        buffer[i+3] === target[3]) {
+                        offset = i;
+                        found = true;
+                        break;
+                    }
+                }
+                
+                if (!found) break;
+                
+                const pos = offset - 4; // Go back to box size field
+                
+                if (pos < 0 || pos + 8 >= buffer.length) {
+                    offset += 4;
+                    continue;
+                }
+                
+                // Get version (1 byte after box header)
+                const version = buffer[pos + 8];
+                
+                // Calculate timestamp offset
+                let tsOff;
+                if (version === 0) {
+                    // 32-bit version
+                    tsOff = pos + 8 + 1 + 3 + 4 + 4; // header + version + flags + creation_time + modification_time
+                } else {
+                    // 64-bit version
+                    tsOff = pos + 8 + 1 + 3 + 8 + 8;
+                }
+                
+                if (tsOff + 4 > buffer.length) {
+                    offset += 4;
+                    continue;
+                }
+                
+                // Read old timestamp
+                const oldTsView = new DataView(buffer.buffer, tsOff, 4);
+                const oldTs = oldTsView.getUint32(0, false); // Big-endian
+                
+                // Calculate new timestamp
+                const newTs = Math.max(1, Math.floor(oldTs / 2));
+                
+                // Write new timestamp
+                const newTsView = new DataView(buffer.buffer, tsOff, 4);
+                newTsView.setUint32(0, newTs, false); // Big-endian
+                
+                // Handle duration
+                let durOff;
+                if (version === 0) {
+                    durOff = tsOff + 4;
+                    if (durOff + 4 <= buffer.length) {
+                        const oldDurView = new DataView(buffer.buffer, durOff, 4);
+                        const oldDur = oldDurView.getUint32(0, false);
+                        const newDurView = new DataView(buffer.buffer, durOff, 4);
+                        newDurView.setUint32(0, Math.floor(oldDur / 2), false);
+                    }
+                } else {
+                    durOff = tsOff + 4;
+                    if (durOff + 8 <= buffer.length) {
+                        const oldDurView = new DataView(buffer.buffer, durOff, 8);
+                        const oldDurHigh = oldDurView.getUint32(0, false);
+                        const oldDurLow = oldDurView.getUint32(4, false);
+                        const oldDur = oldDurHigh * Math.pow(2, 32) + oldDurLow;
+                        const newDur = Math.floor(oldDur / 2);
+                        const newDurView = new DataView(buffer.buffer, durOff, 8);
+                        newDurView.setUint32(0, Math.floor(newDur / Math.pow(2, 32)), false);
+                        newDurView.setUint32(4, newDur % Math.pow(2, 32), false);
+                    }
+                }
+                
+                patched++;
+                offset += 4;
+                
+                // Update progress gradually
+                if (patched % 5 === 0) {
+                    progressBar.style.width = `${Math.min(50 + patched * 2, 75)}%`;
+                }
+            }
+            
+            return patched;
+        }
+        
+        // Optimized patchParam2 that doesn't convert entire buffer to string
+        function patchParam2Optimized(buffer) {
+            let patched = 0;
+            let offset = 0;
+            const target = new Uint8Array([109, 100, 104, 100]); // 'mdhd' in bytes
+            
+            while (true) {
+                // Find 'mdhd' in buffer
+                let found = false;
+                for (let i = offset; i <= buffer.length - 4; i++) {
+                    if (buffer[i] === target[0] && 
+                        buffer[i+1] === target[1] && 
+                        buffer[i+2] === target[2] && 
+                        buffer[i+3] === target[3]) {
+                        offset = i;
+                        found = true;
+                        break;
+                    }
+                }
+                
+                if (!found) break;
+                
+                const pos = offset - 4; // Go back to box size field
+                
+                if (pos < 0 || pos + 8 >= buffer.length) {
+                    offset += 4;
+                    continue;
+                }
+                
+                // Get version (1 byte after box header)
+                const version = buffer[pos + 8];
+                
+                // Calculate base position
+                let base = pos + 8 + 1 + 3; // header + version + flags
+                
+                let tsOff, durOff;
+                if (version === 0) {
+                    // 32-bit version
+                    tsOff = base + 4 + 4; // creation_time + modification_time
+                    durOff = tsOff + 4;
+                    
+                    if (tsOff + 4 <= buffer.length) {
+                        // Read old timestamp
+                        const oldTsView = new DataView(buffer.buffer, tsOff, 4);
+                        const oldTs = oldTsView.getUint32(0, false); // Big-endian
+                        
+                        // Calculate new timestamp
+                        const newTs = Math.max(1, Math.floor(oldTs / 2));
+                        
+                        // Write new timestamp
+                        const newTsView = new DataView(buffer.buffer, tsOff, 4);
+                        newTsView.setUint32(0, newTs, false); // Big-endian
+                        
+                        // Handle duration
+                        if (durOff + 4 <= buffer.length) {
+                            const oldDurView = new DataView(buffer.buffer, durOff, 4);
+                            const oldDur = oldDurView.getUint32(0, false);
+                            const newDurView = new DataView(buffer.buffer, durOff, 4);
+                            newDurView.setUint32(0, Math.floor(oldDur / 2), false);
+                        }
+                    }
+                } else {
+                    // 64-bit version
+                    tsOff = base + 8 + 8; // creation_time + modification_time
+                    durOff = tsOff + 4;
+                    
+                    if (tsOff + 4 <= buffer.length) {
+                        // Read old timestamp
+                        const oldTsView = new DataView(buffer.buffer, tsOff, 4);
+                        const oldTs = oldTsView.getUint32(0, false); // Big-endian
+                        
+                        // Calculate new timestamp
+                        const newTs = Math.max(1, Math.floor(oldTs / 2));
+                        
+                        // Write new timestamp
+                        const newTsView = new DataView(buffer.buffer, tsOff, 4);
+                        newTsView.setUint32(0, newTs, false); // Big-endian
+                        
+                        // Handle duration (64-bit)
+                        if (durOff + 8 <= buffer.length) {
+                            const oldDurView = new DataView(buffer.buffer, durOff, 8);
+                            const oldDurHigh = oldDurView.getUint32(0, false);
+                            const oldDurLow = oldDurView.getUint32(4, false);
+                            const oldDur = oldDurHigh * Math.pow(2, 32) + oldDurLow;
+                            const newDur = Math.floor(oldDur / 2);
+                            const newDurView = new DataView(buffer.buffer, durOff, 8);
+                            newDurView.setUint32(0, Math.floor(newDur / Math.pow(2, 32)), false);
+                            newDurView.setUint32(4, newDur % Math.pow(2, 32), false);
+                        }
+                    }
+                }
+                
+                patched++;
+                offset += 4;
+                
+                // Update progress gradually
+                if (patched % 5 === 0) {
+                    progressBar.style.width = `${Math.min(75 + patched * 2, 95)}%`;
+                }
+            }
+            
+            return patched;
+        }
+        
+        // Show error modal
+        function showError(message) {
+            errorText.textContent = message;
+            errorModal.style.display = 'flex';
+        }
+        
+        // Initialize the app when the page loads
+        window.addEventListener('DOMContentLoaded', initApp);
+    </script>
+</body>
+</html>
