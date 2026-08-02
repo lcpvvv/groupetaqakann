@@ -726,28 +726,23 @@ try{
 
 
     await ffmpeg.exec([
-    "-fflags",
-    "+genpts",
-
-    "-itsscale",
-    "2",
-
     "-i",
     "input.mp4",
 
-    "-map",
-    "0",
+    "-vf",
+    "setpts=0.5*PTS",
 
-    "-c",
+    "-r",
+    "60",
+
+    "-c:v",
+    "libx264",
+
+    "-preset",
+    "veryfast",
+
+    "-c:a",
     "copy",
-
-    "-copyts",
-
-    "-video_track_timescale",
-    "90000",
-
-    "-avoid_negative_ts",
-    "make_zero",
 
     "output.mp4"
 ]);
